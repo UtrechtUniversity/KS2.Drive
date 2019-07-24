@@ -20,6 +20,12 @@ namespace KS2Drive.FS
 {
     public class DavFS : FileSystemBase
     {
+        static void DEBUG(string Op, string Id, string Name)
+        {
+            var t = DateTime.Now.ToString("HHmmss.ffff");
+            Console.WriteLine($"{t} | {Op} | {Id} | {Name}");
+        }
+
         private class UploadPool
         {
             private WebDavClient2[] Clients;
@@ -44,19 +50,16 @@ namespace KS2Drive.FS
 
             public async Task Upload(FileNode CFN, UInt64 Offset)
             {
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | PoolWait | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("PoolWait", CFN.ObjectId, CFN.Name);
 
                 await Sema.WaitAsync().ConfigureAwait(false);
                 try {
-                    t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | PoolWait2 | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("PoolWait2", CFN.ObjectId, CFN.Name);
 
                     var v = await Task.WhenAny(Tasks).ConfigureAwait(false);
                     int i = await v.ConfigureAwait(false);
 
-                    t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | PoolAlloc{i} | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("PoolAlloc" + i, CFN.ObjectId, CFN.Name);
 
                     var UploadTask = CFN.Upload(Clients[i], Offset);
                     Tasks[i] = Task.Run(async () =>
@@ -303,8 +306,7 @@ namespace KS2Drive.FS
             String OperationId = Guid.NewGuid().ToString();
             DebugStart(OperationId, FileName);
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Open | -1 | {FileName}");
+            DEBUG("Open", "-1", FileName);
 
             FileNode0 = default(Object);
             FileDesc = default(Object);
@@ -376,8 +378,7 @@ namespace KS2Drive.FS
                     DebugEnd(OperationId, KnownNode.node, $"STATUS_SUCCESS - From cache - Handle {i}");
                 }
 
-                t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | Open2 | {KnownNode.node.ObjectId} | {FileName}");
+                DEBUG("Open2", KnownNode.node.ObjectId, FileName);
 
                 FileNode0 = KnownNode.node;
                 FileInfo = KnownNode.node.FileInfo;
@@ -442,8 +443,7 @@ namespace KS2Drive.FS
             IEnumerator<Tuple<String, FileNode>> Enumerator;
             Guid OperationId;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | ReadDirectoryEntry | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("ReadDirectoryEntry", CFN.ObjectId, CFN.Name);
 
             if (Context == null)
             {
@@ -509,11 +509,14 @@ namespace KS2Drive.FS
             {
                 try
                 {
+                    DEBUG("AsyncCreate await prev " + Task.Id, CFN.ObjectId, CFN.Name);
                     await Task.ConfigureAwait(false);
                 }
                 catch (Exception) { }
             }
-            await Pool.Upload(CFN, Offset).ConfigureAwait(false);
+            Task = Pool.Upload(CFN, Offset);
+            DEBUG("AsyncCreate await " + Task.Id, CFN.ObjectId, CFN.Name);
+            await Task.ConfigureAwait(false);
         }
 
         public override Int32 Create(
@@ -540,8 +543,7 @@ namespace KS2Drive.FS
 
             FileNode CFN;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Create | -1 | {FileName}");
+            DEBUG("Create", "-1", FileName);
 
             var Proxy = new WebDavClient2();
 
@@ -587,8 +589,7 @@ namespace KS2Drive.FS
                 {
                     CFN = new FileNode(FileName);
 
-                    t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | Create2 | {CFN.ObjectId} | {FileName}");
+                    DEBUG("Create2", CFN.ObjectId, FileName);
 
                     CFN.StartUpload();
                     CFN.ContinuedTask = AsyncCreate(null, CFN, 0);
@@ -634,8 +635,7 @@ namespace KS2Drive.FS
             }
             else
             {
-                t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | Create2 | Directory | {FileName}");
+                DEBUG("Create2", "Directory", FileName);
 
                 try
                 {
@@ -827,8 +827,7 @@ namespace KS2Drive.FS
             FileNode CFN = (FileNode)FileNode0;
             LogListItem L;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Close | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("Close", CFN.ObjectId, CFN.Name);
 
             lock (CFN.OperationLock)
             {
@@ -870,6 +869,8 @@ namespace KS2Drive.FS
                 {
                     if (CFN.ContinuedTask != null)
                     {
+                        DEBUG("Close WAIT prev " + CFN.ContinuedTask.Id, CFN.ObjectId, CFN.Name);
+
                         CFN.ContinuedTask.GetAwaiter().GetResult();
                     }
                     CFN.FlushUpload();
@@ -894,8 +895,7 @@ namespace KS2Drive.FS
                 DebugEnd(OperationId, CFN, $"STATUS_SUCCESS  - Handle {HandleCount}");
             }
 
-            t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | CloseComplete | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("CloseComplete", CFN.ObjectId, CFN.Name);
         }
 
         public override void Cleanup(
@@ -908,8 +908,7 @@ namespace KS2Drive.FS
             FileNode CFN = (FileNode)FileNode0;
             LogListItem L;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Cleanup | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("Cleanup", CFN.ObjectId, CFN.Name);
 
             lock (CFN.OperationLock)
             {
@@ -1006,6 +1005,8 @@ namespace KS2Drive.FS
                 {
                     if (CFN.ContinuedTask != null)
                     {
+                        DEBUG("Cleanup WAIT prev " + CFN.ContinuedTask.Id, CFN.ObjectId, CFN.Name);
+
                         CFN.ContinuedTask.GetAwaiter().GetResult();
                         L = new LogListItem() { Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Object = CFN.ObjectId, Method = $"Cleanup Flush", File = CFN.LocalPath, Result = "STATUS_SUCCESS" };
                         RepositoryActionPerformed?.Invoke(this, L);
@@ -1022,6 +1023,8 @@ namespace KS2Drive.FS
                 {
                     CFN.ContinuedTask = null;
                 }
+
+                DEBUG("CleanupComplete", CFN.ObjectId, CFN.Name);
 
                 /*
                 FileNode FileNode = (FileNode)FileNode0;
@@ -1080,6 +1083,7 @@ namespace KS2Drive.FS
             {
                 try
                 {
+                    DEBUG("AsyncRead await prev " + Task.Id, CFN.ObjectId, CFN.Name);
                     await Task.ConfigureAwait(false);
                 }
                 catch (Exception) { }
@@ -1087,7 +1091,9 @@ namespace KS2Drive.FS
 
             try
             {
-                FileData = await DownloadClient.DownloadPartial(CFN.RepositoryPath, (long)Offset, (long)Offset + Length - 1).ConfigureAwait(false);
+                var T = DownloadClient.DownloadPartial(CFN.RepositoryPath, (long)Offset, (long)Offset + Length - 1);
+                DEBUG("AsyncRead await " + T.Id, CFN.ObjectId, CFN.Name);
+                FileData = await T.ConfigureAwait(false);
 
                 if (Offset == 0 && (ulong)FileData.LongLength == CFN.FileInfo.FileSize)
                 {
@@ -1098,8 +1104,7 @@ namespace KS2Drive.FS
                 {
                     DebugEnd(OperationId, CFN, "STATUS_OBJECT_NAME_NOT_FOUND");
 
-                    var t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | ReadCompleteObjectNameNotFound | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("ReadCompleteObjectNameNotFound", CFN.ObjectId, CFN.Name);
 
                     Host.SendReadResponse(RequestHint, STATUS_OBJECT_NAME_NOT_FOUND, BytesTransferred);
                 }
@@ -1109,8 +1114,7 @@ namespace KS2Drive.FS
 
                     DebugEnd(OperationId, CFN, "STATUS_SUCCESS");
 
-                    var t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | ReadCompleteSuccess | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("ReadCompleteSuccess", CFN.ObjectId, CFN.Name);
 
                     Host.SendReadResponse(RequestHint, STATUS_SUCCESS, BytesTransferred);
                 }
@@ -1120,8 +1124,7 @@ namespace KS2Drive.FS
                 RepositoryAuthenticationFailed?.Invoke(this, null);
                 Cache.Clear();
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | ReadCompleteNetworkUnreachable | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("ReadCompleteNetworkUnreachable", CFN.ObjectId, CFN.Name);
 
                 Host.SendReadResponse(RequestHint, STATUS_NETWORK_UNREACHABLE, 0);
             }
@@ -1129,8 +1132,7 @@ namespace KS2Drive.FS
             {
                 DebugEnd(OperationId, CFN, $"STATUS_END_OF_FILE - {ex.Message}");
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | ReadCompleteEndOfFile | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("ReadCompleteEndOfFile", CFN.ObjectId, CFN.Name);
 
                 Host.SendReadResponse(RequestHint, STATUS_END_OF_FILE, 0);
             }
@@ -1138,8 +1140,7 @@ namespace KS2Drive.FS
             {
                 DebugEnd(OperationId, CFN, $"STATUS_NETWORK_UNREACHABLE - {ex.Message}");
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | ReadCompleteNetworkUnreachable | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("ReadCompleteNetworkUnreachable", CFN.ObjectId, CFN.Name);
 
                 Host.SendReadResponse(RequestHint, STATUS_NETWORK_UNREACHABLE, 0);
             }
@@ -1147,8 +1148,7 @@ namespace KS2Drive.FS
             {
                 DebugEnd(OperationId, CFN, $"STATUS_NETWORK_UNREACHABLE - {ex.Message}");
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | ReadCompleteNetworkUnreachable | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("ReadCompleteNetworkUnreachable", CFN.ObjectId, CFN.Name);
 
                 Host.SendReadResponse(RequestHint, STATUS_NETWORK_UNREACHABLE, 0);
             }
@@ -1165,8 +1165,7 @@ namespace KS2Drive.FS
             BytesTransferred = default(UInt32);
             FileNode CFN = (FileNode)FileNode0;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Read | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("Read", CFN.ObjectId, CFN.Name);
 
             lock (CFN.OperationLock)
             {
@@ -1174,8 +1173,7 @@ namespace KS2Drive.FS
                 DebugStart(OperationId, CFN);
 
                 if (CFN.PendingUpload()) {
-                    t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | Read2Eof | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("Read2Eof", CFN.ObjectId, CFN.Name);
 
                     DebugEnd(OperationId, CFN, "STATUS_END_OF_FILE");
                     return STATUS_END_OF_FILE;
@@ -1184,8 +1182,7 @@ namespace KS2Drive.FS
                 byte[] FileData = null;
                 if (CFN.FileData == null)
                 {
-                    t = DateTime.Now.ToString("HHmmss.ffff");
-                    Console.WriteLine($"{t} | Read2 | {CFN.ObjectId} | {CFN.Name}");
+                    DEBUG("Read2", CFN.ObjectId, CFN.Name);
 
                     DownloadTask = AsyncRead(DownloadTask, OperationId, CFN, Buffer, Offset, Length, Host.GetOperationRequestHint());
                     return STATUS_PENDING;
@@ -1240,18 +1237,20 @@ namespace KS2Drive.FS
 
             if (Task != null)
             {
+                DEBUG("AsyncWrite await prev " + Task.Id, CFN.ObjectId, CFN.Name);
                 await Task.ConfigureAwait(false);
             }
 
             try
             {
-                await CFN.Upload(Buffer, Length).ConfigureAwait(false);
+                Task = CFN.Upload(Buffer, Length);
+                DEBUG("AsyncWrite await " + Task.Id, CFN.ObjectId, CFN.Name);
+                await Task.ConfigureAwait(false);
                 L = new LogListItem() { Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Object = CFN.ObjectId, Method = "Write Flush", File = CFN.LocalPath, Result = "STATUS_SUCCESS" };
                 RepositoryActionPerformed?.Invoke(this, L);
                 DebugEnd(OperationId, CFN, "STATUS_SUCCESS");
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | WriteCompleteSuccess | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("WriteCompleteSuccess", CFN.ObjectId, CFN.Name);
 
                 Host.SendWriteResponse(RequestHint, STATUS_SUCCESS, Length, ref CFN.FileInfo);
             }
@@ -1262,8 +1261,7 @@ namespace KS2Drive.FS
                 RepositoryActionPerformed?.Invoke(this, L);
                 DebugEnd(OperationId, CFN, "STATUS_UNEXPECTED_IO_ERROR");
 
-                var t = DateTime.Now.ToString("HHmmss.ffff");
-                Console.WriteLine($"{t} | WriteCompleteError | {CFN.ObjectId} | {CFN.Name}");
+                DEBUG("WriteCompleteError", CFN.ObjectId, CFN.Name);
 
                 Host.SendWriteResponse(RequestHint, STATUS_UNEXPECTED_IO_ERROR, Length, ref CFN.FileInfo);
             }
@@ -1288,8 +1286,7 @@ namespace KS2Drive.FS
             LogListItem L;
             FileNode CFN = (FileNode)FileNode0;
 
-            var t = DateTime.Now.ToString("HHmmss.ffff");
-            Console.WriteLine($"{t} | Write | {CFN.ObjectId} | {CFN.Name}");
+            DEBUG("Write", CFN.ObjectId, CFN.Name);
 
             lock (CFN.OperationLock)
             {
