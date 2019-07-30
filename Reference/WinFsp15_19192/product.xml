@@ -25,6 +25,7 @@
 
       <ExitCodes>
         <ExitCode Value="0" Result="Success"/>
+        <ExitCode Value="1603" Result="ExistingInstallation"/>
         <ExitCode Value="1641" Result="SuccessReboot"/>
         <ExitCode Value="3010" Result="SuccessReboot"/>
         <DefaultExitCode Result="Fail" String="GeneralFailure"/>
