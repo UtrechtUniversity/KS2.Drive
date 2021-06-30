@@ -62,7 +62,7 @@
                                         <Style.Resources>
                                             <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                                 <VisualBrush.Visual>
-                                                    <Label Content="https:/its.data.uu.nl" Foreground="LightGray" />
+                                                    <Label Content="https:/its.data.ru.nl" Foreground="LightGray" />
                                                 </VisualBrush.Visual>
                                             </VisualBrush>
                                         </Style.Resources>
@@ -101,7 +101,7 @@
                                         <Style.Resources>
                                             <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                                 <VisualBrush.Visual>
-                                                    <Label Content="j.a.smith@uu.nl" Foreground="LightGray" />
+                                                    <Label Content="jan.smith@ru.nl" Foreground="LightGray" />
                                                 </VisualBrush.Visual>
                                             </VisualBrush>
                                         </Style.Resources>
