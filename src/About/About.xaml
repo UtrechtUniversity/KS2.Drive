@@ -6,17 +6,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:KS2Drive.About"
     mc:Ignorable="d"
-    Title="Yoda Drive - About" Height="550" Width="700" ResizeMode="NoResize" Icon="/KS2Drive;component/Resources/Main.ico" WindowStartupLocation="CenterScreen">
+    Title="Radboud Research Drive - About" Height="550" Width="700" ResizeMode="NoResize" Icon="/KS2Drive;component/Resources/Main.ico" WindowStartupLocation="CenterScreen">
     <Grid>
         <RichTextBox x:Name="richTextBox" Margin="10" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsReadOnly="True" IsDocumentEnabled="True">
             <FlowDocument>
                 <Paragraph FontSize="35" Margin="0">
                     <InlineUIContainer>
                         <Image Margin="0,5,0,-18" Stretch="Fill" Width="60" Height="60" Source="/KS2Drive;component/ru-logo.png"/>
-                    </InlineUIContainer> Yoda Drive - 0.2.6.2
+                    </InlineUIContainer> Radboud Research Drive - 0.2.6.2
                 </Paragraph>
-                <Paragraph FontStyle="Italic" TextAlignment="Left" FontSize="20" Foreground="Gray">This software allows you to mount a Yoda drive as a local drive.</Paragraph>
-                <Paragraph FontStyle="Italic" TextAlignment="Left" FontSize="14" Foreground="Gray">The software is intented to be used in conjunction with Yoda but should work with any webDAV server.</Paragraph>
+                <Paragraph FontStyle="Italic" TextAlignment="Left" FontSize="20" Foreground="Gray">This software allows you to mount a Radboud Research drive as a local drive.</Paragraph>
+                <Paragraph FontStyle="Italic" TextAlignment="Left" FontSize="14" Foreground="Gray">The software is intented to be used in conjunction with RRD but should work with any webDAV server.</Paragraph>
 
                 <Paragraph FontSize="24" Margin="0,0,0,0">Usage</Paragraph>
 
@@ -27,13 +27,13 @@
                         </Paragraph>
                     </ListItem>
                     <ListItem>
-                        <Paragraph TextAlignment="Left" FontSize="14">Click on the Yoda Drive icon on your desktop</Paragraph>
+                        <Paragraph TextAlignment="Left" FontSize="14">Click on the Radboud Research Drive icon on your desktop</Paragraph>
                     </ListItem>
                     <ListItem>
                         <Paragraph TextAlignment="Left" FontSize="14">Configure the server</Paragraph>
                     </ListItem>
                     <ListItem Margin="20,0,0,0">
-                        <Paragraph TextAlignment="Left" FontSize="14">Enter the Yoda drive URL of the server</Paragraph>
+                        <Paragraph TextAlignment="Left" FontSize="14">Enter the Radboud Research drive URL of the server</Paragraph>
                     </ListItem>
                     <ListItem Margin="20,0,0,0">
                         <Paragraph TextAlignment="Left" FontSize="14">Enter your credentials</Paragraph>

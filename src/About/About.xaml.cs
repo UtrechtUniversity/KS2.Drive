@@ -18,9 +18,13 @@ namespace KS2Drive.About
 {
     public partial class About : MetroWindow
     {
+        private static readonly SolidColorBrush RUColor = new SolidColorBrush(Color.FromRgb(153, 33, 28));
         public About()
         {
             InitializeComponent();
+
+            WindowTitleBrush = RUColor;
+            GlowBrush = RUColor;
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
