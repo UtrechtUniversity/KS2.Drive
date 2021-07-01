@@ -56,8 +56,8 @@ namespace KS2Drive
             Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/KS2Drive;component/Resources/Main.ico")).Stream;
             AppNotificationIcon.Icon = new System.Drawing.Icon(iconStream);
             AppNotificationIcon.Visible = true;
-            AppNotificationIcon.Text = "Yoda Drive";
-            AppNotificationIcon.BalloonTipText = "Yoda Drive";
+            AppNotificationIcon.Text = "RDR drive";
+            AppNotificationIcon.BalloonTipText = "RDR drive";
             AppNotificationIcon.MouseClick += (s, e) => { this.Dispatcher.Invoke(() => { AppMenu.IsOpen = !AppMenu.IsOpen; }); };
 
             #endregion
@@ -105,7 +105,7 @@ namespace KS2Drive
 
             LogList.ItemsSource = ItemsToLog;
 
-            Dispatcher.Invoke(() => AppNotificationIcon.ShowBalloonTip(3000, "Yoda Drive", $"Yoda Drive has started", System.Windows.Forms.ToolTipIcon.Info));
+            Dispatcher.Invoke(() => AppNotificationIcon.ShowBalloonTip(3000, "RDR drive", $"RDR drive has started", System.Windows.Forms.ToolTipIcon.Info));
 
             if (this.AppConfiguration.IsConfigured())
             {

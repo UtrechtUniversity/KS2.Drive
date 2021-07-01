@@ -18,6 +18,7 @@ namespace KS2Drive.Config
     {
         private String configurationFolderPath;
         private MainWindow main;
+        private static readonly SolidColorBrush RUColor = new SolidColorBrush(Color.FromRgb(153, 33, 28));
 
         public ConfigurationManager AppConfiguration { get; set; }
         public Configuration CurrentConfiguration { get; set; }
@@ -88,6 +89,9 @@ namespace KS2Drive.Config
             this.AppConfiguration = ((App)Application.Current).AppConfiguration;
 
             EnterConfigurationData();
+
+            WindowTitleBrush = RUColor;
+            GlowBrush = RUColor;
         }
 
         private void InitDriveNameButtons()
@@ -127,14 +131,8 @@ namespace KS2Drive.Config
             b.Opacity = 1;
             b.Click += bt_SwitchCurrentConfiguration_Click;
             b.Tag = AppConfiguration.Configurations[i];
-            
-            if (AppConfiguration.Configurations[i] == CurrentConfiguration)
-            {
-                b.Background = new SolidColorBrush(Color.FromRgb(254, 229, 56));
-            } else
-            {
-                b.Background = new SolidColorBrush(Color.FromRgb(247, 247, 247));
-            }
+            b.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            b.Background = RUColor;
         }
 
         private void EnterConfigurationData()
